@@ -1,5 +1,5 @@
 import pandas as pd #importando a biblioteca
-
+#esse código mostra a planilha completa, não apenas os faltantes
 planilhaProd = pd.read_csv('Planilha prod.csv').astype(str) #atribuindo a planilha à variável
 
 #faltas_coluna = planilhaProd.iloc[:,2].astype(str) #atribuindo a coluna de faltas à variável e fazendo com que os dados sejam transformados em str
@@ -46,21 +46,30 @@ planilhaAlunos = pd.read_csv('ID Alunos.csv').astype(str)
 
 id_to_name = pd.Series(planilhaAlunos['nome'].values, index=planilhaAlunos["id"]).to_dict() #Criar um dicionário onde as chaves são os IDs dos alunos e os valores são os nomes dos alunos:
 planilhaProd['Nome do Aluno'] = planilhaProd['Identificação do aluno'].map(id_to_name) 
-print(planilhaProd)
+#print(planilhaProd)
 
-planilhaProd['Frequência'] = 'teste'
-
-colunas_ordenadas = ['Data', 'Identificação do aluno', 'Frequência', 'Nome do Aluno', 'Situação', 'Faltou?', 'Turno'] #criando uma variável com os valores dos títulos de linhas_filtradas
+colunas_ordenadas = ['Data', 'Identificação do aluno', 'Nome do Aluno', 'Situação', 'Faltou?', 'Turno'] #criando uma variável com os valores dos títulos de linhas_filtradas
 planilhaProd = planilhaProd[colunas_ordenadas] #trocando os valores das linhas de acordo com as posições colunas_ordenadas  
 
 planilhaProd['Data'] = pd.to_datetime(planilhaProd['Data']) #convertendo os valores da coluna data para o formato de data +horário
-planilhaProd['Data'] = planilhaProd['Data'].dt.strftime('%d - %m - %Y %H:%M:%S')#formatando as ordens e quantidade de valores que aparecem
+planilhaProd['Data'] = planilhaProd['Data'].dt.strftime('%d/%m/%Y %H:%M')#formatando as ordens e quantidade de valores que aparecem
 
-for index, row in planilhaProd.iterrows():
+'''for index, row in planilhaProd.iterrows():
     if index <=1200:
         print(row)
     else:
-        break
+        break'''
 
-planilhaProd.to_csv('Planilha-presenca-dados-com-if.csv', index=False)
+planilhaProd.to_csv('Planilha-presenca-dados-com-if.csv', sep=';', index=False, encoding='utf-8-sig')
 #print(planilhaProd)
+
+
+planilhaAlunos.columns = ["ID", 'Nome'] #alterando os valores das colunas da variável
+planilhaAlunos['Frequência'] = "" #criando uma coluna vazia
+
+#agora, quero gerar uma porcentagem relativa faltas/dias letivos
+#para cada planilhaProd[Faltou?] = "Sim" contar +1 para cada ID
+
+
+
+print(planilhaAlunos)

@@ -54,4 +54,4 @@ linhas_filtradas['Data'] = linhas_filtradas['Data'].dt.strftime('%d - %m - %Y %H
 
 print(linhas_filtradas)
 
-linhas_filtradas.to_csv('Planilha-linhas-filtradas.csv', index=False)
+linhas_filtradas.to_csv('Planilha-linhas-filtradas.csv',sep=';', index=False, encoding='utf-8-sig')
