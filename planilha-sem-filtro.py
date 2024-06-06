@@ -66,10 +66,30 @@ planilhaProd.to_csv('Planilha-presenca-dados-com-if.csv', sep=';', index=False, 
 
 planilhaAlunos.columns = ["ID", 'Nome'] #alterando os valores das colunas da variável
 planilhaAlunos['Frequência'] = "" #criando uma coluna vazia
-
+planilhaAlunos['Total de aulas'] = ""
+planilhaAlunos['Total de faltas'] = ""
 #agora, quero gerar uma porcentagem relativa faltas/dias letivos
 #para cada planilhaProd[Faltou?] = "Sim" contar +1 para cada ID
 
+faltas = planilhaProd[planilhaProd["Faltou?"]=="Sim"] #filtrando as faltas e atribuindo a uma variavel
+cont_faltas = faltas["Identificação do aluno"].value_counts() #cont_faltas armazena a ocorrência de cada ID 
+faltas_por_alunos = cont_faltas.to_dict() #dicionário em que a chave é o ID e o valor é a ocorrência de faltas
 
+planilhaAlunos["Frequência"] = planilhaAlunos["ID"].map(faltas_por_alunos).fillna(0).astype(int) #atribuindo à coluna frequencia os valores usando o dicionario para mapear os dados; preenchendo as linhas em que frequencia =0
+'''
+cont_id1 = planilhaProd[planilhaProd["Identificação do aluno"]!= 0] #filtrando os ids e atribuindo a uma variavel
+cont_id = cont_id1["Identificação do aluno"].value_counts() #cont_id armazena a ocorrência de cada ID 
+id_por_dias = cont_id.to_dict() #dicionário em que a chave é o ID e o valor é a ocorrência 
 
-print(planilhaAlunos)
+planilhaTeste = planilhaAlunos
+planilhaTeste ["Ocorrência"]= planilhaTeste["ID"].map(id_por_dias)'''
+
+total_de_aulas = round(len(planilhaProd)/118)
+
+frequencia_alunos = round((total_de_aulas-planilhaAlunos['Frequência'])/total_de_aulas, 3)
+
+planilhaAlunos['Frequência'] = frequencia_alunos
+planilhaAlunos['Total de aulas'] = total_de_aulas
+planilhaAlunos['Total de faltas'] = planilhaAlunos["ID"].map(faltas_por_alunos).fillna(0).astype(int)
+planilhaAlunos.to_csv('Frequência-dos-alunos.csv', sep =';', index=False, encoding='utf-8-sig')
+#print(planilhaAlunos)
