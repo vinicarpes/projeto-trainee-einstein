@@ -45,6 +45,8 @@ planilhaAlunos = pd.read_csv('ID Alunos.csv').astype(str)
 #print(planilhaAlunos)
 
 id_to_name = pd.Series(planilhaAlunos['nome'].values, index=planilhaAlunos["id"]).to_dict() #Criar um dicionário onde as chaves são os IDs dos alunos e os valores são os nomes dos alunos:
+#print(id_to_name)
+
 planilhaProd['Nome do Aluno'] = planilhaProd['Identificação do aluno'].map(id_to_name) 
 #print(planilhaProd)
 
@@ -52,44 +54,53 @@ colunas_ordenadas = ['Data', 'Identificação do aluno', 'Nome do Aluno', 'Situa
 planilhaProd = planilhaProd[colunas_ordenadas] #trocando os valores das linhas de acordo com as posições colunas_ordenadas  
 
 planilhaProd['Data'] = pd.to_datetime(planilhaProd['Data']) #convertendo os valores da coluna data para o formato de data +horário
-planilhaProd['Data'] = planilhaProd['Data'].dt.strftime('%d/%m/%Y %H:%M')#formatando as ordens e quantidade de valores que aparecem
-
-'''for index, row in planilhaProd.iterrows():
-    if index <=1200:
-        print(row)
-    else:
-        break'''
+planilhaProd['Data'] = planilhaProd['Data'].dt.strftime('%d/%m/%Y')#formatando as ordens e quantidade de valores que aparecem
 
 planilhaProd.to_csv('Planilha-presenca-dados-com-if.csv', sep=';', index=False, encoding='utf-8-sig')
 #print(planilhaProd)
 
 
 planilhaAlunos.columns = ["ID", 'Nome'] #alterando os valores das colunas da variável
-planilhaAlunos['Frequência'] = "" #criando uma coluna vazia
+planilhaAlunos['Frequência (%)'] = "" #criando uma coluna vazia
 planilhaAlunos['Total de aulas'] = ""
 planilhaAlunos['Total de faltas'] = ""
 #agora, quero gerar uma porcentagem relativa faltas/dias letivos
 #para cada planilhaProd[Faltou?] = "Sim" contar +1 para cada ID
 
-faltas = planilhaProd[planilhaProd["Faltou?"]=="Sim"] #filtrando as faltas e atribuindo a uma variavel
-cont_faltas = faltas["Identificação do aluno"].value_counts() #cont_faltas armazena a ocorrência de cada ID 
-faltas_por_alunos = cont_faltas.to_dict() #dicionário em que a chave é o ID e o valor é a ocorrência de faltas
 
-planilhaAlunos["Frequência"] = planilhaAlunos["ID"].map(faltas_por_alunos).fillna(0).astype(int) #atribuindo à coluna frequencia os valores usando o dicionario para mapear os dados; preenchendo as linhas em que frequencia =0
-'''
-cont_id1 = planilhaProd[planilhaProd["Identificação do aluno"]!= 0] #filtrando os ids e atribuindo a uma variavel
-cont_id = cont_id1["Identificação do aluno"].value_counts() #cont_id armazena a ocorrência de cada ID 
-id_por_dias = cont_id.to_dict() #dicionário em que a chave é o ID e o valor é a ocorrência 
+ocorrencia_data= set()
+for i in range(planilhaProd.shape[0]): 
+    ocorrencia_data.add(planilhaProd.iloc[i,0])
+print(len(ocorrencia_data))
 
-planilhaTeste = planilhaAlunos
-planilhaTeste ["Ocorrência"]= planilhaTeste["ID"].map(id_por_dias)'''
+quantidade_aulas = len(ocorrencia_data)*2
+print(quantidade_aulas)
 
-total_de_aulas = round(len(planilhaProd)/118)
+faltas = planilhaProd[planilhaProd['Faltou?']=="Sim"]
 
-frequencia_alunos = round((total_de_aulas-planilhaAlunos['Frequência'])/total_de_aulas, 3)
+# Criar um dicionário onde as chaves são os IDs dos alunos e os valores são as quantidades de faltas
+quantidade_faltas = faltas['Identificação do aluno'].value_counts().to_dict()
 
-planilhaAlunos['Frequência'] = frequencia_alunos
-planilhaAlunos['Total de aulas'] = total_de_aulas
-planilhaAlunos['Total de faltas'] = planilhaAlunos["ID"].map(faltas_por_alunos).fillna(0).astype(int)
+planilhaAlunos['Total de aulas'] = quantidade_aulas
+# Mapear o número de faltas para os alunos em planilhaAlunos
+planilhaAlunos['Total de faltas'] = planilhaAlunos["ID"].map(quantidade_faltas).fillna(0).astype(int)
+
+planilhaAlunos['Frequência (%)'] = (((planilhaAlunos['Total de aulas']-planilhaAlunos['Total de faltas'])/planilhaAlunos['Total de aulas'])* 100).round(2)
+
+#Agrupa as faltas por "Identificação do aluno" e cria uma lista de datas para cada aluno, armazenando o resultado em um dicionário datas_faltas.
+datas_faltas = faltas.groupby('Identificação do aluno')['Data'].apply(list).to_dict()
+
+colunas_ordenadas = [ "ID", 'Nome', 'Total de aulas', 'Total de faltas', 'Frequência (%)']
+planilhaAlunos=planilhaAlunos[colunas_ordenadas]
+
+max_faltas = max(map(len, datas_faltas.values())) if datas_faltas else 0
+for i in range(max_faltas):
+    planilhaAlunos[f'Data de Falta {i + 1}'] = planilhaAlunos["ID"].map(lambda x: datas_faltas.get(x, [])[i] if len(datas_faltas.get(x, [])) > i else '')
+
+
+print(planilhaAlunos)
+
+
 planilhaAlunos.to_csv('Frequência-dos-alunos.csv', sep =';', index=False, encoding='utf-8-sig')
-#print(planilhaAlunos)
+'''
+# '''
