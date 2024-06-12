@@ -1,22 +1,8 @@
 import pandas as pd #importando a biblioteca
-#esse código mostra a planilha completa, não apenas os faltantes
+
 planilhaProd = pd.read_csv('Planilha prod.csv').astype(str) #atribuindo a planilha à variável
 
-#faltas_coluna = planilhaProd.iloc[:,2].astype(str) #atribuindo a coluna de faltas à variável e fazendo com que os dados sejam transformados em str
-
-# id_alunos_coluna = planilhaProd.iloc[:, 1].astype(str) #atribuindo a coluna de faltas à variável e fazendo com que os dados sejam transformados em str
-
-#print("Aqui coluna de faltas:\n", faltas_coluna) #EXIBINDO A COLUNA DE FALTAS
-
-'''string_filtro = "True" #criando uma varável para filtrar a coluna
-
-linhas_filtradas = planilhaProd.loc[faltas_coluna.str.contains(string_filtro)].astype(str) #nesta variável estou armazenando todas as colunas de cada linha em que a terceira célula seja igual a "True"'''
 planilhaProd.columns =['Situação', 'Identificação do aluno', 'Faltou?', "Data", 'Turno'] #alterando os títulos das colunas
-#print(linhas_filtradas) #exibindo a variável supracitada
-
-'''id_alunos_filtradas = linhas_filtradas.iloc[:,1] #aqui armazeno todas as matrículas dos faltantes'''
-
-#print(id_alunos_filtradas) #exibindo a matrícula dos faltantes
 
 if not planilhaProd.empty: #verificando que não tenha posições vazias
     for index, row in planilhaProd.iterrows(): #laço for que pega o índice e dados de cada linha percorrida 
@@ -89,18 +75,14 @@ planilhaAlunos['Frequência (%)'] = (((planilhaAlunos['Total de aulas']-planilha
 
 #Agrupa as faltas por "Identificação do aluno" e cria uma lista de datas para cada aluno, armazenando o resultado em um dicionário datas_faltas.
 datas_faltas = faltas.groupby('Identificação do aluno')['Data'].apply(list).to_dict()
+turnos_faltas = faltas.groupby("Identificação do aluno")['Turno'].apply(list).to_dict() 
 
 colunas_ordenadas = [ "ID", 'Nome', 'Total de aulas', 'Total de faltas', 'Frequência (%)']
 planilhaAlunos=planilhaAlunos[colunas_ordenadas]
 
 max_faltas = max(map(len, datas_faltas.values())) if datas_faltas else 0
 for i in range(max_faltas):
-    planilhaAlunos[f'Data de Falta {i + 1}'] = planilhaAlunos["ID"].map(lambda x: datas_faltas.get(x, [])[i] if len(datas_faltas.get(x, [])) > i else '')
-
-
+    planilhaAlunos[f'Falta {i + 1}'] = planilhaAlunos["ID"].map(lambda x: datas_faltas.get(x, [])[i] if len(datas_faltas.get(x, [])) > i else '') + " " + planilhaAlunos["ID"].map(lambda x: turnos_faltas.get(x, [])[i] if len(turnos_faltas.get(x, []))> i else "")
 print(planilhaAlunos)
 
-
 planilhaAlunos.to_csv('Frequência-dos-alunos.csv', sep =';', index=False, encoding='utf-8-sig')
-'''
-# '''
