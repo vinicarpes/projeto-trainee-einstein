@@ -25,57 +25,50 @@ if not planilhaProd.empty: #verificando que não tenha posições vazias
             planilhaProd.at[index, "Turno"] = "17:45 - 20:00" 
         else: planilhaProd.at[index, "Turno"] = "20:15 - 22:00" 
 
-#print(linhas_filtradas)
-
 planilhaAlunos = pd.read_csv('ID Alunos.csv').astype(str)
-#print(planilhaAlunos)
 
-id_to_name = pd.Series(planilhaAlunos['nome'].values, index=planilhaAlunos["id"]).to_dict() #Criar um dicionário onde as chaves são os IDs dos alunos e os valores são os nomes dos alunos:
-#print(id_to_name)
+#Criar um dicionário onde as chaves são os IDs dos alunos e os valores são os nomes dos alunos:
+id_to_name = pd.Series(planilhaAlunos['nome'].values, index=planilhaAlunos["id"]).to_dict() 
 
 planilhaProd['Nome do Aluno'] = planilhaProd['Identificação do aluno'].map(id_to_name) 
-#print(planilhaProd)
 
-colunas_ordenadas = ['Data', 'Identificação do aluno', 'Nome do Aluno', 'Situação', 'Faltou?', 'Turno'] #criando uma variável com os valores dos títulos de linhas_filtradas
+colunas_ordenadas = ['Data', 'Identificação do aluno', 'Nome do Aluno', 'Situação', 'Faltou?', 'Turno'] 
 planilhaProd = planilhaProd[colunas_ordenadas] #trocando os valores das linhas de acordo com as posições colunas_ordenadas  
 
 planilhaProd['Data'] = pd.to_datetime(planilhaProd['Data']) #convertendo os valores da coluna data para o formato de data +horário
 planilhaProd['Data'] = planilhaProd['Data'].dt.strftime('%d/%m/%Y')#formatando as ordens e quantidade de valores que aparecem
 
-planilhaProd.to_csv('Planilha-presenca-dados-com-if.csv', sep=';', index=False, encoding='utf-8-sig')
-#print(planilhaProd)
-
+planilhaProd.to_csv('Planilha-presenca-dados-filtrados.csv', sep=';', index=False, encoding='utf-8-sig')
 
 planilhaAlunos.columns = ["ID", 'Nome'] #alterando os valores das colunas da variável
 planilhaAlunos['Frequência (%)'] = "" #criando uma coluna vazia
 planilhaAlunos['Total de aulas'] = ""
 planilhaAlunos['Total de faltas'] = ""
-#agora, quero gerar uma porcentagem relativa faltas/dias letivos
-#para cada planilhaProd[Faltou?] = "Sim" contar +1 para cada ID
 
-
-ocorrencia_data= set()
+'''ocorrencia_data= set()
 for i in range(planilhaProd.shape[0]): 
     ocorrencia_data.add(planilhaProd.iloc[i,0])
-print(len(ocorrencia_data))
+#print(ocorrencia_data)
 
-quantidade_aulas = len(ocorrencia_data)*2
-print(quantidade_aulas)
+#print(quantidade_aulas)'''
 
 faltas = planilhaProd[planilhaProd['Faltou?']=="Sim"]
 
 # Criar um dicionário onde as chaves são os IDs dos alunos e os valores são as quantidades de faltas
-quantidade_faltas = faltas['Identificação do aluno'].value_counts().to_dict()
+quantidade_faltas = faltas['Identificação do aluno'].value_counts().to_dict() 
+quantidade_ids = planilhaProd["Identificação do aluno"].value_counts().to_dict()
+print(quantidade_ids)
 
-planilhaAlunos['Total de aulas'] = quantidade_aulas
+planilhaAlunos['Total de aulas'] = planilhaAlunos['ID'].map(quantidade_ids).fillna(0).astype(int)
 # Mapear o número de faltas para os alunos em planilhaAlunos
 planilhaAlunos['Total de faltas'] = planilhaAlunos["ID"].map(quantidade_faltas).fillna(0).astype(int)
 
-planilhaAlunos['Frequência (%)'] = (((planilhaAlunos['Total de aulas']-planilhaAlunos['Total de faltas'])/planilhaAlunos['Total de aulas'])* 100).round(2)
+planilhaAlunos['Frequência (%)'] = (((planilhaAlunos['Total de aulas'] -planilhaAlunos['Total de faltas'])/planilhaAlunos['Total de aulas'])* 100).round(2)
 
 #Agrupa as faltas por "Identificação do aluno" e cria uma lista de datas para cada aluno, armazenando o resultado em um dicionário datas_faltas.
 datas_faltas = faltas.groupby('Identificação do aluno')['Data'].apply(list).to_dict()
 turnos_faltas = faltas.groupby("Identificação do aluno")['Turno'].apply(list).to_dict() 
+
 
 colunas_ordenadas = [ "ID", 'Nome', 'Total de aulas', 'Total de faltas', 'Frequência (%)']
 planilhaAlunos=planilhaAlunos[colunas_ordenadas]
