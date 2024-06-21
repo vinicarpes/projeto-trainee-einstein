@@ -1,4 +1,9 @@
 import pandas as pd #importando a biblioteca
+import matplotlib.pyplot as plt
+from openpyxl import Workbook, load_workbook
+from openpyxl.chart import BarChart, Reference
+
+
 
 planilhaProd = pd.read_csv('Planilha prod.csv').astype(str) #atribuindo a planilha à variável
 
@@ -45,19 +50,11 @@ planilhaAlunos['Frequência (%)'] = "" #criando uma coluna vazia
 planilhaAlunos['Total de aulas'] = ""
 planilhaAlunos['Total de faltas'] = ""
 
-'''ocorrencia_data= set()
-for i in range(planilhaProd.shape[0]): 
-    ocorrencia_data.add(planilhaProd.iloc[i,0])
-#print(ocorrencia_data)
-
-#print(quantidade_aulas)'''
-
 faltas = planilhaProd[planilhaProd['Faltou?']=="Sim"]
 
 # Criar um dicionário onde as chaves são os IDs dos alunos e os valores são as quantidades de faltas
 quantidade_faltas = faltas['Identificação do aluno'].value_counts().to_dict() 
 quantidade_ids = planilhaProd["Identificação do aluno"].value_counts().to_dict()
-print(quantidade_ids)
 
 planilhaAlunos['Total de aulas'] = planilhaAlunos['ID'].map(quantidade_ids).fillna(0).astype(int)
 # Mapear o número de faltas para os alunos em planilhaAlunos
@@ -76,6 +73,33 @@ planilhaAlunos=planilhaAlunos[colunas_ordenadas]
 max_faltas = max(map(len, datas_faltas.values())) if datas_faltas else 0
 for i in range(max_faltas):
     planilhaAlunos[f'Falta {i + 1}'] = planilhaAlunos["ID"].map(lambda x: datas_faltas.get(x, [])[i] if len(datas_faltas.get(x, [])) > i else '') + " " + planilhaAlunos["ID"].map(lambda x: turnos_faltas.get(x, [])[i] if len(turnos_faltas.get(x, []))> i else "")
-print(planilhaAlunos)
+#print(planilhaAlunos)
 
 planilhaAlunos.to_csv('Frequência-dos-alunos.csv', sep =';', index=False, encoding='utf-8-sig')
+
+#gerar planilha com: nome, frequecia, mes
+
+dadosBrutos = pd.read_csv('Frequência-dos-alunos.csv', sep=';', encoding='utf-8-sig')
+resumoMensal = dadosBrutos[['Nome', 'Frequência (%)']]
+resumoMensal.columns=['Nome', 'Frequência absoluta (%)']
+
+resumoMensal ['Janeiro'] = ''
+resumoMensal ['Fevereiro'] = ''
+resumoMensal ['Março'] = ''
+resumoMensal ['Abril'] = ''
+resumoMensal ['Maio'] = ''
+resumoMensal ['Junho'] = ''
+resumoMensal ['Julho'] = ''
+resumoMensal ['Agosto'] = ''
+resumoMensal ['Setembro'] = ''
+resumoMensal ['Outubro'] = ''
+resumoMensal ['Novembro'] = ''
+resumoMensal ['Dezembro'] = ''
+
+
+print(resumoMensal)
+
+#fazer as frequenncias mensais com base na planilhaProd
+
+
+
