@@ -9,9 +9,9 @@ turno e presença(true ou false).
 
 A partir desses dados, criei planilhas com diversos intuitos: 
 
-**planilha de resumo mensal** 
+**planilha de resumo mensal:** 
 Criada para resumir a frequência de cada aluno no decorrer dos meses, assim como a frequência absoluta.
 Além disso, também acusa todo valor abaixo de 75% por meio de formatação condicional.
 
-**Planilha de faltas**
+**Planilha de faltas:**
 Criada para extrair todas as as faltas de cada aluno e calcular a frequência total.
